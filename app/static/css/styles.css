@@ -531,3 +531,36 @@ body {
     cursor: not-allowed;
     transform: none;
 }
+/* Tag Styles - Add these to your existing CSS */
+.task-tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+
+.tag {
+    display: inline-block;
+    padding: 4px 10px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 500;
+    text-transform: lowercase;
+    letter-spacing: 0.3px;
+    box-shadow: 0 2px 4px rgba(102, 126, 234, 0.2);
+}
+
+.tag:before {
+    content: '#';
+    opacity: 0.8;
+    margin-right: 2px;
+}
+
+.tag.work { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); }
+.tag.shopping { background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%); }
+.tag.finance { background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); }
+.tag.personal { background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%); }
+.tag.urgent { background: linear-gradient(135deg, #fd7e14 0%, #dc3545 100%); }
+.tag.health { background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%); }

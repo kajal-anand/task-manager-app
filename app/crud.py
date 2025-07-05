@@ -1,18 +1,19 @@
 from sqlalchemy.orm import Session
-from .models import Task, TaskStatus
+from fastapi import HTTPException
+from .models import Task, TaskStatus, Tag
 from .schemas import TaskCreate, TaskUpdate
 from datetime import datetime
 from .ai_service import AIService
 import logging
-from fastapi import HTTPException
 
 logger = logging.getLogger(__name__)
 
 async def create_task(db: Session, task: TaskCreate):
-    """Create a new task with AI-assigned priority."""
+    """Create a new task with AI-assigned priority and tags."""
     try:
         ai_service = AIService()
         priority = await ai_service.prioritize_task(task.title, task.description or "")
+        tags = await ai_service.generate_tags(task.title, task.description or "")
         
         db_task = Task(
             title=task.title,
@@ -21,6 +22,15 @@ async def create_task(db: Session, task: TaskCreate):
             priority=priority
         )
         db.add(db_task)
+        
+        # Add tags to task
+        for tag_name in tags:
+            tag = db.query(Tag).filter(Tag.name == tag_name).first()
+            if not tag:
+                tag = Tag(name=tag_name)
+                db.add(tag)
+            db_task.tags.append(tag)
+        
         db.commit()
         db.refresh(db_task)
         return db_task
@@ -29,7 +39,7 @@ async def create_task(db: Session, task: TaskCreate):
         db.rollback()
         raise
 
-def get_tasks(db: Session, status: str = None, priority: str = None, ordering: str = None):
+def get_tasks(db: Session, status: str = None, priority: str = None, tag: str = None, ordering: str = None):
     """Retrieve tasks with optional filtering and sorting."""
     try:
         query = db.query(Task)
@@ -47,6 +57,8 @@ def get_tasks(db: Session, status: str = None, priority: str = None, ordering: s
             query = query.filter(Task.status == TaskStatus(status))
         if priority:
             query = query.filter(Task.priority == priority)
+        if tag:
+            query = query.join(Task.tags).filter(Tag.name == tag)
         if ordering:
             if ordering.startswith('-'):
                 query = query.order_by(getattr(Task, ordering[1:]).desc())
@@ -80,7 +92,7 @@ def update_task(db: Session, task_id: int, task_update: TaskUpdate):
         update_data = task_update.dict(exclude_unset=True)
         for key, value in update_data.items():
             setattr(task, key, value)
-            
+        
         if task.completed:
             task.status = TaskStatus.COMPLETED
         elif task.deadline and task.deadline < datetime.utcnow():

@@ -50,11 +50,12 @@ def get_tasks(
     db: Session = Depends(database.get_db),
     status: str = None,
     priority: str = None,
+    tag: str = None,
     ordering: str = None
 ):
     """Retrieve tasks with optional filtering and sorting."""
     try:
-        return crud.get_tasks(db, status, priority, ordering)
+        return crud.get_tasks(db, status, priority, tag, ordering)
     except Exception as e:
         logger.error(f"Failed to retrieve tasks: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail="Internal server error")

@@ -34,6 +34,11 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <div>
                                     <h3 class="task-title">${task.title}</h3>
                                     ${task.description ? `<p class="task-description">${task.description}</p>` : ''}
+                                    ${task.tags && task.tags.length > 0 ? `
+                                        <div class="task-tags">
+                                            ${task.tags.map(tag => `<span class="tag ${tag.name}">${tag.name}</span>`).join('')}
+                                        </div>
+                                    ` : ''}
                                 </div>
                                 <span class="priority-badge priority-${task.priority}">
                                     ${task.priority}
