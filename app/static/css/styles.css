@@ -1,0 +1,16 @@
+/* @tailwind base;
+@tailwind components;
+@tailwind utilities; */
+
+body {
+    font-family: Arial, sans-serif;
+}
+
+.task-card {
+    transition: all 0.3s ease;
+}
+
+.task-card.critical { background-color: #fee2e2; }
+.task-card.high { background-color: #fef9c3; }
+.task-card.medium { background-color: #d1fae5; }
+.task-card.low { background-color: #dbeafe; }
