@@ -31,34 +31,59 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 taskElement.innerHTML = `
                             <div class="task-header">
-                                <div>
-                                    <h3 class="task-title">${task.title}</h3>
-                                    ${task.description ? `<p class="task-description">${task.description}</p>` : ''}
-                                    ${task.tags && task.tags.length > 0 ? `
-                                        <div class="task-tags">
-                                            ${task.tags.map(tag => `<span class="tag ${tag.name}">${tag.name}</span>`).join('')}
-                                        </div>
-                                    ` : ''}
-                                </div>
-                                <span class="priority-badge priority-${task.priority}">
-                                    ${task.priority}
-                                </span>
-                            </div>
-                            <div class="task-meta">
-                                <span>⏰ ${deadlineText}</span>
-                            </div>
-                            <div class="task-actions">
-                                ${!task.completed ? `
-                                    <button onclick="completeTask(${task.id})" class="btn btn-success btn-small">
-                                        ✅ Complete
-                                    </button>
-                                    <button onclick="editTask(${task.id})" class="btn btn-warning btn-small">
-                                        ✏️ Edit
-                                    </button>
-                                ` : ''}
-                                <button onclick="deleteTask(${task.id})" class="btn btn-danger btn-small">
-                                    🗑️ Delete
-                                </button>
+        <div>
+            <h3 class="task-title">${task.title}</h3>
+            ${task.description ? `<p class="task-description">${task.description}</p>` : ''}
+            ${task.tags && task.tags.length > 0 ? `
+                <div class="task-tags">
+                    ${task.tags.map(tag => `<span class="tag ${tag.name}">${tag.name}</span>`).join('')}
+                </div>
+            ` : ''}
+        </div>
+        <span class="priority-badge priority-${task.priority}">
+            ${task.priority}
+        </span>
+    </div>
+    <div class="task-meta">
+        <span>⏰ ${deadlineText}</span>
+    </div>
+    
+    ${task.subtasks && task.subtasks.length > 0 ? `
+        <div class="subtasks-section">
+            <div class="subtasks-header">
+                <span class="subtasks-title">📋 Subtasks</span>
+                <span class="subtasks-count">${task.subtasks.filter(st => st.completed).length}/${task.subtasks.length}</span>
+            </div>
+            <div class="subtasks-list">
+                ${task.subtasks.map(subtask => `
+                    <div class="subtask-item ${subtask.completed ? 'completed' : ''}">
+                        <input type="checkbox" class="subtask-checkbox" 
+                               ${subtask.completed ? 'checked' : ''} 
+                               onchange="toggleSubtask(${subtask.id})"
+                               ${subtask.completed ? 'disabled' : ''}>
+                        <span>${subtask.title}</span>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    ` : ''}
+    
+    <div class="task-actions">
+        ${!task.completed ? `
+            <button onclick="completeTask(${task.id})" class="btn btn-success btn-small">
+                ✅ Complete
+            </button>
+            <button onclick="editTask(${task.id})" class="btn btn-warning btn-small">
+                ✏️ Edit
+            </button>
+            <button onclick="generateSubtasks(${task.id})" class="btn btn-subtasks btn-small" id="subtasks-btn-${task.id}">
+                🔄 Generate Subtasks
+            </button>
+        ` : ''}
+        <button onclick="deleteTask(${task.id})" class="btn btn-danger btn-small">
+            🗑️ Delete
+        </button>
+    </div>
                             </div>
                         `;
                 taskList.appendChild(taskElement);
@@ -224,6 +249,56 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     };
+
+    // Generate subtasks function
+window.generateSubtasks = async (taskId) => {
+    const button = document.getElementById(`subtasks-btn-${taskId}`);
+    const originalText = button.innerHTML;
+    
+    button.innerHTML = '<div class="loading"></div> Generating...';
+    button.disabled = true;
+    
+    try {
+        const response = await fetch(`/api/tasks/${taskId}/generate-subtasks/`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to generate subtasks');
+        }
+        
+        // Refresh the task list to show new subtasks
+        fetchTasks();
+    } catch (error) {
+        console.error('Error generating subtasks:', error);
+        alert('Error generating subtasks. Please try again.');
+    } finally {
+        button.innerHTML = originalText;
+        button.disabled = false;
+    }
+};
+
+// Toggle subtask completion
+window.toggleSubtask = async (subtaskId) => {
+    try {
+        const response = await fetch(`/api/tasks/${subtaskId}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ completed: true })
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to update subtask');
+        }
+        
+        fetchTasks();
+    } catch (error) {
+        console.error('Error updating subtask:', error);
+        // Revert checkbox state on error
+        fetchTasks();
+    }
+};
 
     // Tab switching
     tabButtons.forEach(button => {

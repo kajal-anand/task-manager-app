@@ -19,6 +19,7 @@ class TaskBase(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
     deadline: Optional[datetime] = None
+    parent_id: Optional[int] = None
 
 class TaskCreate(TaskBase):
     title: str
@@ -34,6 +35,7 @@ class TaskResponse(TaskBase):
     created_at: datetime
     updated_at: datetime
     tags: List[TagResponse] = []
+    subtasks: List['TaskResponse'] = []
 
     class Config:
         # orm_mode = True

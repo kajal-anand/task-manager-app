@@ -19,7 +19,8 @@ async def create_task(db: Session, task: TaskCreate):
             title=task.title,
             description=task.description,
             deadline=task.deadline,
-            priority=priority
+            priority=priority,
+            parent_id=task.parent_id
         )
         db.add(db_task)
         
@@ -39,13 +40,48 @@ async def create_task(db: Session, task: TaskCreate):
         db.rollback()
         raise
 
-def get_tasks(db: Session, status: str = None, priority: str = None, tag: str = None, ordering: str = None):
-    """Retrieve tasks with optional filtering and sorting."""
+async def generate_subtasks(db: Session, task_id: int):
+    """Generate sub-tasks for a given task using AI."""
     try:
-        query = db.query(Task)
+        task = db.query(Task).filter(Task.id == task_id).first()
+        if not task:
+            raise HTTPException(status_code=404, detail="Task not found")
+        
+        ai_service = AIService()
+        subtask_titles = await ai_service.generate_subtasks(task.title, task.description or "")
+        
+        subtasks = []
+        for title in subtask_titles:
+            subtask = Task(
+                title=title,
+                description=None,
+                deadline=task.deadline,
+                priority=TaskPriority.LOW,
+                parent_id=task_id
+            )
+            db.add(subtask)
+            # Add parent task's tags to sub-task
+            for tag in task.tags:
+                subtask.tags.append(tag)
+            subtasks.append(subtask)
+        
+        db.commit()
+        for subtask in subtasks:
+            db.refresh(subtask)
+        
+        return subtasks
+    except Exception as e:
+        logger.error(f"Error generating sub-tasks for task {task_id}: {str(e)}", exc_info=True)
+        db.rollback()
+        raise
+
+def get_tasks(db: Session, status: str = None, priority: str = None, tag: str = None, ordering: str = None):
+    """Retrieve all top-level tasks with optional filtering and sorting."""
+    try:
+        query = db.query(Task).filter(Task.parent_id.is_(None))  # Only top-level tasks
         
         # Update task statuses based on deadline and completion
-        for task in query.all():
+        for task in db.query(Task).all():  # Update all tasks, including sub-tasks
             if task.completed:
                 task.status = TaskStatus.COMPLETED
             elif task.deadline and task.deadline < datetime.utcnow():

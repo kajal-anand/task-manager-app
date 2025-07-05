@@ -93,3 +93,15 @@ def delete_task(task_id: int, db: Session = Depends(database.get_db)):
     except Exception as e:
         logger.error(f"Failed to delete task {task_id}: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail="Internal server error")
+
+@app.post("/api/tasks/{task_id}/generate-subtasks/", response_model=List[schemas.TaskResponse])
+async def generate_subtasks(task_id: int, db: Session = Depends(database.get_db)):
+    """Generate sub-tasks for a given task using AI."""
+    try:
+        subtasks = await crud.generate_subtasks(db, task_id)
+        return subtasks
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        logger.error(f"Failed to generate sub-tasks for task {task_id}: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Internal server error")

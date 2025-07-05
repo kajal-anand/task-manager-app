@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, Enum, Boolean, Table, ForeignKey
+from sqlalchemy import Column, Integer, String, DateTime, Enum, Boolean, ForeignKey, Table
 from sqlalchemy.orm import relationship
 from .database import Base
 from datetime import datetime
@@ -15,7 +15,7 @@ class TaskPriority(enum.Enum):
     HIGH = "high"
     CRITICAL = "critical"
 
-# Many-to-Many relationship table
+# Many-to-Many relationship table for tasks and tags
 task_tags = Table(
     'task_tags',
     Base.metadata,
@@ -35,6 +35,9 @@ class Task(Base):
     completed = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    parent_id = Column(Integer, ForeignKey('tasks.id'), nullable=True)
+    parent = relationship("Task", remote_side=[id], back_populates="subtasks")
+    subtasks = relationship("Task", back_populates="parent")
     tags = relationship("Tag", secondary=task_tags, back_populates="tasks")
 
 class Tag(Base):

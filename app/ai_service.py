@@ -71,8 +71,39 @@ class AIService:
             valid_tags = ['work', 'personal', 'health', 'finance', 'learning', 'urgent', 'shopping']
             tags = [tag.lower() for tag in tags if isinstance(tag, str) and tag.lower() in valid_tags]
             logger.info(f"Tags generated: {tags}")
-            return tags[:3]  # Ensure max 3 tags
+            return tags[:3]
             
         except Exception as e:
             logger.error(f"Gemini API tag generation failed: {str(e)}", exc_info=True)
+            return []
+
+    async def generate_subtasks(self, title: str, description: str = "") -> List[str]:
+        """Generate sub-tasks for a given task using Gemini 1.5 Flash API."""
+        try:
+            prompt = (
+                f"You are a project manager. Break down the following task into a list of smaller, actionable sub-tasks. "
+                f"Return the result as a JSON array of simple task titles. "
+                f"Task Title: {title}, Description: {description}."
+            )
+            logger.info(f"Sending sub-task prompt to Gemini: {prompt}")
+            
+            response = await self.model.generate_content_async(
+                prompt,
+                generation_config={
+                    "temperature": 0.7,
+                    "max_output_tokens": 200,
+                    "response_mime_type": "application/json"
+                }
+            )
+            
+            import json
+            subtasks = json.loads(response.text.strip())
+            if not isinstance(subtasks, list) or not all(isinstance(t, str) for t in subtasks):
+                logger.warning(f"Invalid sub-tasks format received: {subtasks}, returning empty list")
+                return []
+            logger.info(f"Sub-tasks generated: {subtasks}")
+            return subtasks[:5]
+            
+        except Exception as e:
+            logger.error(f"Gemini API sub-task generation failed: {str(e)}", exc_info=True)
             return []

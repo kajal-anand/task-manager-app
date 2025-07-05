@@ -564,3 +564,70 @@ body {
 .tag.personal { background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%); }
 .tag.urgent { background: linear-gradient(135deg, #fd7e14 0%, #dc3545 100%); }
 .tag.health { background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%); }
+
+/* Subtasks Styles - Add these to your existing CSS */
+.subtasks-section {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #e2e8f0;
+}
+
+.subtasks-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.subtasks-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #4a5568;
+}
+
+.subtasks-count {
+    font-size: 0.8rem;
+    color: #718096;
+    background: #f7fafc;
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+.subtask-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    margin-bottom: 6px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border-left: 3px solid #e2e8f0;
+    font-size: 0.85rem;
+}
+
+.subtask-item.completed {
+    background: #f0fff4;
+    border-left-color: #28a745;
+    text-decoration: line-through;
+    opacity: 0.7;
+}
+
+.subtask-checkbox {
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+.btn-subtasks {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    color: white;
+}
+
+.btn-subtasks:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(23, 162, 184, 0.3);
+}
+
+.btn-subtasks:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
