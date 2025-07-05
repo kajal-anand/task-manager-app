@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,13 +8,14 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="/static/css/styles.css">
 </head>
+
 <body>
     <div class="container">
         <div class="header">
             <h1>Task Manager</h1>
             <p>Organize your tasks efficiently and boost productivity</p>
         </div>
-        
+
         <div class="main-content">
             <!-- Task Form -->
             <form id="task-form" class="task-form">
@@ -55,7 +57,48 @@
                 </div>
             </div>
         </div>
+
+        <!-- Edit Modal -->
+        <div id="edit-modal" class="modal-overlay">
+            <div class="modal">
+                <div class="modal-header">
+                    <h2 class="modal-title">✏️ Edit Task</h2>
+                    <button class="close-btn" onclick="closeEditModal()">&times;</button>
+                </div>
+                <form id="edit-form" class="modal-form">
+                    <div class="form-group">
+                        <label for="edit-title">Task Title</label>
+                        <input type="text" id="edit-title" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-description">Description</label>
+                        <textarea id="edit-description" class="form-input" rows="3"
+                            placeholder="Add task description..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-deadline">Deadline</label>
+                        <input type="datetime-local" id="edit-deadline" class="form-input">
+                    </div>
+                    <!-- <div class="form-group">
+                        <label for="edit-priority">Priority</label>
+                        <select id="edit-priority" class="priority-select">
+                            <option value="low">🔵 Low Priority</option>
+                            <option value="medium">🟢 Medium Priority</option>
+                            <option value="high">🟡 High Priority</option>
+                            <option value="critical">🔴 Critical Priority</option>
+                        </select>
+                    </div> -->
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-cancel" onclick="closeEditModal()">Cancel</button>
+                        <button type="submit" class="btn btn-save" id="save-btn">
+                            <span>Save Changes</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
     <script src="/static/js/main.js"></script>
 </body>
+
 </html>

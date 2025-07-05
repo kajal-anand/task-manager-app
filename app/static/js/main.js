@@ -114,24 +114,97 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Edit task
+    // Edit task - Updated with modal
     window.editTask = async (taskId) => {
-        const title = prompt('Enter new title:');
-        const description = prompt('Enter new description:');
-        const deadline = prompt('Enter new deadline (YYYY-MM-DDTHH:MM):');
-        if (title) {
-            try {
-                await fetch(`/api/tasks/${taskId}`, {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ title, description, deadline })
-                });
-                fetchTasks();
-            } catch (error) {
-                console.error('Error updating task:', error);
-            }
+        try {
+            // First, fetch the current task data
+            const response = await fetch(`/api/tasks/${taskId}`);
+            const task = await response.json();
+
+            // Populate the modal form
+            document.getElementById('edit-title').value = task.title;
+            document.getElementById('edit-description').value = task.description || '';
+            document.getElementById('edit-deadline').value = task.deadline ?
+                new Date(task.deadline).toISOString().slice(0, 16) : '';
+            // document.getElementById('edit-priority').value = task.priority || 'medium';
+
+            // Store the task ID for later use
+            document.getElementById('edit-form').dataset.taskId = taskId;
+
+            // Show the modal
+            openEditModal();
+        } catch (error) {
+            console.error('Error fetching task for edit:', error);
+            alert('Error loading task details. Please try again.');
         }
     };
+
+    // Modal functions
+    window.openEditModal = () => {
+        const modal = document.getElementById('edit-modal');
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    };
+
+    window.closeEditModal = () => {
+        const modal = document.getElementById('edit-modal');
+        modal.classList.remove('active');
+        document.body.style.overflow = 'auto';
+        document.getElementById('edit-form').reset();
+    };
+
+    // Handle edit form submission
+    document.getElementById('edit-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const saveBtn = document.getElementById('save-btn');
+        const originalText = saveBtn.innerHTML;
+        saveBtn.innerHTML = '<div class="loading"></div>';
+        saveBtn.disabled = true;
+
+        const taskId = e.target.dataset.taskId;
+        const updatedTask = {
+            title: document.getElementById('edit-title').value,
+            description: document.getElementById('edit-description').value,
+            deadline: document.getElementById('edit-deadline').value,
+            priority: document.getElementById('edit-priority').value
+        };
+
+        try {
+            const response = await fetch(`/api/tasks/${taskId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updatedTask)
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to update task');
+            }
+
+            closeEditModal();
+            fetchTasks();
+        } catch (error) {
+            console.error('Error updating task:', error);
+            alert('Error updating task. Please try again.');
+        } finally {
+            saveBtn.innerHTML = originalText;
+            saveBtn.disabled = false;
+        }
+    });
+
+    // Close modal when clicking outside
+    document.getElementById('edit-modal').addEventListener('click', (e) => {
+        if (e.target === document.getElementById('edit-modal')) {
+            closeEditModal();
+        }
+    });
+
+    // Close modal with Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && document.getElementById('edit-modal').classList.contains('active')) {
+            closeEditModal();
+        }
+    });
 
     // Delete task
     window.deleteTask = async (taskId) => {
