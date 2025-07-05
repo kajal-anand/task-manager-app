@@ -1,0 +1,72 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Virtual environments
+venv/
+env/
+.venv/
+.env/
+
+# Environment files
+*.env
+.env.*
+
+# Logs
+*.log
+
+# SQLite and other local DBs
+*.db
+*.sqlite3
+
+# Testing
+.coverage
+htmlcov/
+.tox/
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+
+# Jupyter
+.ipynb_checkpoints
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# PyInstaller
+build/
+dist/
+*.spec
+
+# Packaging
+*.egg-info/
+.eggs/
+*.manifest
+*.bak
+*.old
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# IDE/editor settings
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Mac/Linux/Windows system files
+.DS_Store
+Thumbs.db
+
+# Task-specific
+*.tmp
+*.cache
+*.bak
