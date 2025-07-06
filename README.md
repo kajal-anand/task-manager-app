@@ -194,11 +194,8 @@ This Task Management API integrates three AI-powered features to enhance product
 
 
 ### Explanation
-- **Scope**: The README covers all three AI features (Options A, B, and C) as implemented in the latest codebase (artifact version ID: 007e03bf-2603-4a66-82c2-b707eb2fda48), including the fix for sub-task duplication.
+- **Scope**: The README covers all three AI features (Options A, B, and C) as implemented in the latest codebase
 - **AI Model**: Specifies Gemini 1.5 Flash for all features, chosen for its higher free-tier limits and reliability.
 - **Value and Implementation**: Each feature’s purpose, technical details (e.g., database changes, API prompts, response handling), and usage instructions are clearly documented.
 - **API Usage**: Provides example API calls and responses for clarity, aligning with the endpoints in `main.py`.
-- **Fixes Incorporated**: Reflects the resolution of the 422 error, table creation issues, and sub-task duplication fix (using `Task.parent_id.is_(None)` in `get_tasks`).
 - **Setup and Notes**: Includes comprehensive setup steps, dependency list, and guidance on handling Gemini API quotas.
-
-If you need additional details or modifications to the README (e.g., more examples or specific sections), please let me know!
