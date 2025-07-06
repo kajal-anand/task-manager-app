@@ -144,30 +144,46 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Edit task - Updated with modal
+    // Edit task - Updated with modal and debug logging
     window.editTask = async (taskId) => {
+        console.log('Edit task called with ID:', taskId);
         try {
             // First, fetch the current task data
+            console.log('Fetching task data...');
             const response = await fetch(`/api/tasks/${taskId}`);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
             const task = await response.json();
+            console.log('Task data received:', task);
 
             // Populate the modal form
             document.getElementById('edit-title').value = task.title;
             document.getElementById('edit-description').value = task.description || '';
             document.getElementById('edit-deadline').value = task.deadline ?
                 new Date(task.deadline).toISOString().slice(0, 16) : '';
-            // document.getElementById('edit-priority').value = task.priority || 'medium';
+
+            // Only set priority if the field exists
+            const priorityField = document.getElementById('edit-priority');
+            if (priorityField) {
+                priorityField.value = task.priority || 'medium';
+            }
 
             // Store the task ID for later use
             document.getElementById('edit-form').dataset.taskId = taskId;
+            console.log('Form populated, opening modal...');
 
             // Show the modal
             openEditModal();
+            console.log('Modal opened successfully');
         } catch (error) {
             console.error('Error fetching task for edit:', error);
-            alert('Error loading task details. Please try again.');
+            alert(`Error loading task details: ${error.message}`);
         }
     };
+
 
     // Modal functions
     window.openEditModal = () => {
@@ -184,8 +200,10 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Handle edit form submission
+    // Handle edit form submission with debug logging
     document.getElementById('edit-form').addEventListener('submit', async (e) => {
         e.preventDefault();
+        console.log('Form submitted');
 
         const saveBtn = document.getElementById('save-btn');
         const originalText = saveBtn.innerHTML;
@@ -193,29 +211,42 @@ document.addEventListener('DOMContentLoaded', () => {
         saveBtn.disabled = true;
 
         const taskId = e.target.dataset.taskId;
+        console.log('Updating task ID:', taskId);
+
         const updatedTask = {
             title: document.getElementById('edit-title').value,
             description: document.getElementById('edit-description').value,
             deadline: document.getElementById('edit-deadline').value,
-            priority: document.getElementById('edit-priority').value
+            // Only include priority if the field exists
+            ...(document.getElementById('edit-priority') && {
+                priority: document.getElementById('edit-priority').value
+            })
         };
 
+        console.log('Update data:', updatedTask);
+
         try {
+            console.log('Sending PATCH request...');
             const response = await fetch(`/api/tasks/${taskId}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(updatedTask)
             });
 
+            console.log('Response status:', response.status);
+
             if (!response.ok) {
-                throw new Error('Failed to update task');
+                const errorData = await response.json();
+                console.error('Server error:', errorData);
+                throw new Error(`Failed to update task: ${errorData.detail || 'Unknown error'}`);
             }
 
+            console.log('Task updated successfully');
             closeEditModal();
             fetchTasks();
         } catch (error) {
             console.error('Error updating task:', error);
-            alert('Error updating task. Please try again.');
+            alert(`Error updating task: ${error.message}`);
         } finally {
             saveBtn.innerHTML = originalText;
             saveBtn.disabled = false;
@@ -251,54 +282,54 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Generate subtasks function
-window.generateSubtasks = async (taskId) => {
-    const button = document.getElementById(`subtasks-btn-${taskId}`);
-    const originalText = button.innerHTML;
-    
-    button.innerHTML = '<div class="loading"></div> Generating...';
-    button.disabled = true;
-    
-    try {
-        const response = await fetch(`/api/tasks/${taskId}/generate-subtasks/`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
-        });
-        
-        if (!response.ok) {
-            throw new Error('Failed to generate subtasks');
-        }
-        
-        // Refresh the task list to show new subtasks
-        fetchTasks();
-    } catch (error) {
-        console.error('Error generating subtasks:', error);
-        alert('Error generating subtasks. Please try again.');
-    } finally {
-        button.innerHTML = originalText;
-        button.disabled = false;
-    }
-};
+    window.generateSubtasks = async (taskId) => {
+        const button = document.getElementById(`subtasks-btn-${taskId}`);
+        const originalText = button.innerHTML;
 
-// Toggle subtask completion
-window.toggleSubtask = async (subtaskId) => {
-    try {
-        const response = await fetch(`/api/tasks/${subtaskId}`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ completed: true })
-        });
-        
-        if (!response.ok) {
-            throw new Error('Failed to update subtask');
+        button.innerHTML = '<div class="loading"></div> Generating...';
+        button.disabled = true;
+
+        try {
+            const response = await fetch(`/api/tasks/${taskId}/generate-subtasks/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to generate subtasks');
+            }
+
+            // Refresh the task list to show new subtasks
+            fetchTasks();
+        } catch (error) {
+            console.error('Error generating subtasks:', error);
+            alert('Error generating subtasks. Please try again.');
+        } finally {
+            button.innerHTML = originalText;
+            button.disabled = false;
         }
-        
-        fetchTasks();
-    } catch (error) {
-        console.error('Error updating subtask:', error);
-        // Revert checkbox state on error
-        fetchTasks();
-    }
-};
+    };
+
+    // Toggle subtask completion
+    window.toggleSubtask = async (subtaskId) => {
+        try {
+            const response = await fetch(`/api/tasks/${subtaskId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ completed: true })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to update subtask');
+            }
+
+            fetchTasks();
+        } catch (error) {
+            console.error('Error updating subtask:', error);
+            // Revert checkbox state on error
+            fetchTasks();
+        }
+    };
 
     // Tab switching
     tabButtons.forEach(button => {

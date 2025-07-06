@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
-from .models import Task, TaskStatus, Tag
+from .models import Task, TaskStatus, Tag,TaskPriority
 from .schemas import TaskCreate, TaskUpdate
 from datetime import datetime
 from .ai_service import AIService
