@@ -4,7 +4,7 @@ from .database import Base
 from datetime import datetime
 import enum
 
-class TaskStatus(enum.Enum):
+class TaskStatus(enum.Enum): # Enum defines allowed values for status and priority
     UPCOMING = "upcoming"
     COMPLETED = "completed"
     MISSED = "missed"
@@ -15,7 +15,7 @@ class TaskPriority(enum.Enum):
     HIGH = "high"
     CRITICAL = "critical"
 
-# Many-to-Many relationship table
+# Many-to-Many relationship table, Join table to enable many-to-many
 task_tags = Table(
     'task_tags',
     Base.metadata,
@@ -24,6 +24,7 @@ task_tags = Table(
 )
 
 class Task(Base):
+    # Main table for tasks with fields like title, deadline, priority, etc.
     __tablename__ = "tasks"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -38,6 +39,7 @@ class Task(Base):
     tags = relationship("Tag", secondary=task_tags, back_populates="tasks")
 
 class Tag(Base):
+    # Tags that can be attached to tasks
     __tablename__ = "tags"
 
     id = Column(Integer, primary_key=True, index=True)

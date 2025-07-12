@@ -31,6 +31,7 @@ app.add_middleware(
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
 
+#  API Endpoints
 @app.get("/", response_class=HTMLResponse)
 async def get_index(request: Request):
     """Serve the frontend index page."""

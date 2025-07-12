@@ -1,10 +1,10 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session              # SQLAlchemy session to interact with the DB
 from fastapi import HTTPException
-from .models import Task, TaskStatus, Tag
-from .schemas import TaskCreate, TaskUpdate
+from .models import Task, TaskStatus, Tag       # ORM models (tables)
+from .schemas import TaskCreate, TaskUpdate     # Pydantic schemas (validated request data)
 from datetime import datetime
 from .ai_service import AIService
-import logging
+import logging                                  # For error/debug logging
 
 logger = logging.getLogger(__name__)
 

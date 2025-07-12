@@ -3,6 +3,7 @@ from .config import Config
 import logging
 from .models import TaskPriority
 from typing import List
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -66,7 +67,7 @@ class AIService:
                 }
             )
             
-            import json
+            
             tags = json.loads(response.text.strip())
             valid_tags = ['work', 'personal', 'health', 'finance', 'learning', 'urgent', 'shopping']
             tags = [tag.lower() for tag in tags if isinstance(tag, str) and tag.lower() in valid_tags]
